@@ -18,11 +18,5 @@ data class GivePositionEvent(
 ) : Event {
     override fun type() = Event.Type.GivePosition
 
-    override fun compareTo(other: Event) = when {
-        createdAt != other.createdAt -> (createdAt - other.createdAt).toInt()
-        type() != other.type() -> type() compareTo other.type()
-        author != other.author -> author compareTo author
-
-        else -> 0
-    }
+    override fun compareTo(other: Event) = createdAt compareTo other.createdAt
 }
