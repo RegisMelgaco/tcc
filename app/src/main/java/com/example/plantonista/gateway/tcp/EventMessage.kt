@@ -12,7 +12,6 @@ data class EventMessage(
     fun toEntity(): Event = when(type) {
         Event.Type.GivePosition -> GivePositionEvent(author, createdAt)
     }
-
 }
 
 fun Event.toMsg() = when(type()) {
