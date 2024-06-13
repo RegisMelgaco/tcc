@@ -1,16 +1,9 @@
-package com.example.plantonista.gateway.tcp
+package com.example.plantonista.distevents.tcp
 
 import android.util.Log
-import com.example.plantonista.state.Event
+import com.example.plantonista.distevents.EventData
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
+import kotlinx.coroutines.withTimeout
 import java.io.PrintStream
 import java.net.Socket
 import java.util.Scanner
@@ -19,12 +12,10 @@ import java.util.Scanner
 class TCPClient(private val timeoutMillis: Long) {
     private val gson = Gson()
 
-    suspend fun sync(address: String, port: Int, events: Array<Event>): Array<Event> {
-        var newEvents = arrayOf<Event>()
+    suspend fun sync(address: String, port: Int, events: List<EventData>): List<EventData> {
+        var newEvents = arrayOf<EventData>()
 
-        withContext(Dispatchers.IO) {
-            delay(5000)
-
+        withTimeout(timeoutMillis) {
             Log.d(TAG, "sync started")
 
             try {
@@ -42,16 +33,13 @@ class TCPClient(private val timeoutMillis: Long) {
 
                 Log.d(TAG, "received createdAts: $createdAts")
 
-                var msg = events
+                val resp = events
                     .filter { it.createdAt !in createdAts }
-                    .map { it.toMsg() }
                     .toTypedArray()
 
-                output.println(gson.toJson(msg))
+                output.println(gson.toJson(resp))
 
-                msg = gson.fromJson(input.nextLine(), Array<EventMessage>::class.java)
-
-                newEvents = msg.map { it.toEntity() }.toTypedArray()
+                newEvents = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
 
                 socket.close()
             } catch (e: Exception) {
@@ -59,7 +47,7 @@ class TCPClient(private val timeoutMillis: Long) {
             }
         }
 
-        return newEvents
+        return newEvents.toList()
     }
 
     companion object {

@@ -15,7 +15,7 @@ import (
 func (r *Repository) Sync(ctx context.Context, input tracker.Node) ([]tracker.Node, error) {
 	const operation = "Repository.Sync"
 
-	newNodes, err := r.queryByUpdatedAt(ctx, input.UpdatedAt)
+	newNodes, err := r.queryByUpdatedAt(ctx, input.UpdatedAt, input.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
@@ -154,7 +154,7 @@ func (r *Repository) queryNodeByEmail(ctx context.Context, email string) (node, 
 	return result, nil
 }
 
-func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time) ([]node, error) {
+func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time, email string) ([]node, error) {
 	const operation = "Repository.queryByUpdatedAt"
 
 	logger := logs.FromContext(ctx, operation).With(slog.Time("start", time.Now()))
@@ -166,7 +166,7 @@ func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time) (
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
 
-	rows, err := stmt.QueryContext(ctx, updateAt)
+	rows, err := stmt.QueryContext(ctx, updateAt, email)
 	if err != nil {
 		logger.Error("query selectNodeByUpdated failed", slog.String("query", selectNodeByUpdated), slog.String("err", err.Error()))
 

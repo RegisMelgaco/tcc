@@ -30,7 +30,7 @@ const (
 			node_id, email, public_ip, updated_at, group_concat(local_ip)
 		from node
 		natural left join local_ip
-		where updated_at > ?
+		where updated_at > ? and email != ?
 		group by node_id;
 `
 	selectLocalIPs = `

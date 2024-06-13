@@ -17,9 +17,9 @@ type SyncOutput struct {
 
 type NodeData struct {
 	Email     string    `json:"email"`
-	PublicIP  string    `json:"public_ip"`
-	LocalIPs  []string  `json:"local_ips"`
-	UpdatedAt time.Time `json:"updated_at"`
+	PublicIP  string    `json:"publicIP"`
+	LocalIPs  []string  `json:"localIPs"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +38,8 @@ func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input.PublicIP = strings.Split(r.RemoteAddr, ":")[0]
+
+	logger.Debug("good request", slog.Any("input", input))
 
 	newNodes, err := h.repo.Sync(r.Context(), tracker.Node{
 		Email:     input.Email,
@@ -70,7 +72,7 @@ func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {
 
 	output.Neighbors = rs
 
-	if err = json.NewEncoder(w).Encode(rs); err != nil {
+	if err = json.NewEncoder(w).Encode(output); err != nil {
 		logger.Error("failed to write response", slog.String("err", err.Error()))
 	}
 }

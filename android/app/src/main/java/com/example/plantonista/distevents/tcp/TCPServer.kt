@@ -1,32 +1,18 @@
-package com.example.plantonista.gateway.tcp
+package com.example.plantonista.distevents.tcp
 
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import com.example.plantonista.R
-import com.example.plantonista.state.Event
-import com.example.plantonista.state.GivePositionEvent
+import androidx.room.Room
+import com.example.plantonista.distevents.EventData
+import com.example.plantonista.distevents.sqlite.Database
+import com.example.plantonista.distevents.sqlite.toEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.EOFException
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
 import java.io.PrintStream
 import java.net.ServerSocket
 import java.net.Socket
@@ -46,9 +32,9 @@ class TCPServer : Service() {
         Log.d(TAG, "created")
 
         GlobalScope.launch {
-            var socket: Socket? = null
+            var socket: Socket?
 
-            val events = mutableListOf<Event>(GivePositionEvent("regis", 1))
+            val eventDao = Room.databaseBuilder(applicationContext, Database::class.java, Database.NAME).build().eventDao()
 
             try {
                 serverSocket = ServerSocket(PORT)
@@ -56,6 +42,7 @@ class TCPServer : Service() {
                 Log.d(TAG, "connecting to port: $PORT")
 
                 while (working.get()) {
+                    val events = eventDao.getAll()
                     Log.d(TAG, "working: $events")
 
                     if (serverSocket != null) {
@@ -73,16 +60,18 @@ class TCPServer : Service() {
 
                             output.println(gson.toJson(events.map { it.createdAt }))
 
-                            var msg = gson.fromJson(input.nextLine(), Array<EventMessage>::class.java)
+                            val newEvents = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
 
-                            events.addAll(msg.map { it.toEntity() })
+                            eventDao.insertAll(
+                                newEvents.map { it.toEntity() }
+                            )
 
-                            msg = events
+                            val resp = events
                                 .filter { it.createdAt !in createdAts }
-                                .map { it.toMsg() }
+                                .map { it.toData() }
                                 .toTypedArray()
 
-                            output.println(gson.toJson(msg))
+                            output.println(gson.toJson(resp))
                         }
                     } else {
                         Log.e(TAG, "Couldn't create ServerSocket!")
@@ -99,8 +88,9 @@ class TCPServer : Service() {
     }
 
     companion object {
+        const val PORT = 2001
+
         private val TAG = TCPServer::class.java.simpleName
-        private const val PORT = 2001
-        private const val TIMEOUT = 30_000L
+        private var TIMEOUT = 30_000L
     }
 }

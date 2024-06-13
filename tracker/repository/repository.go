@@ -2,9 +2,11 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/mattn/go-sqlite3"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -25,14 +27,18 @@ func (n node) localIPs() []string {
 }
 
 func New() (*Repository, error) {
-	db, err := sql.Open("sqlite3", "")
+	db, err := sql.Open("sqlite3", "tracke_db.sqlite")
 	if err != nil {
 		return nil, fmt.Errorf("create repository: %w", err)
 	}
 
 	_, err = db.Exec(schema)
 	if err != nil {
-		return nil, fmt.Errorf("failed to run migration: %w", err)
+
+		var sqlErr sqlite3.Error
+		if !errors.As(err, &sqlErr) || sqlErr.Code != 1 || sqlErr.ExtendedCode != 1 {
+			return nil, fmt.Errorf("failed to run migration: %w", err)
+		}
 	}
 
 	return &Repository{db: db}, nil
