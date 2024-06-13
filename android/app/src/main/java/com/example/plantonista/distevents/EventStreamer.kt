@@ -110,6 +110,8 @@ class EventStreamer<E: Event>(
                     handler(factory.fromData(event.toData()))
                 }
             }
+
+            Log.d(TAG, "replayed $events")
         }
     }
 
@@ -179,11 +181,13 @@ class EventStreamer<E: Event>(
         try {
             val newEvents = TCPClient(TIMEOUT).sync(ip, TCPServer.PORT, events)
 
+            Log.d(TAG, "new events $newEvents")
+
             for (ne in newEvents) {
                 add(factory.fromData(ne))
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "failed to sync with node: $e")
         }
     }
 

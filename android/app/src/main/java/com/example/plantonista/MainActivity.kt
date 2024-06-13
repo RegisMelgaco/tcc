@@ -23,6 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         viewModel.sync(applicationContext)
+        startService(Intent(applicationContext, EventStreamer.getEventService()))
         
         setContent {
             val count = viewModel.count.observeAsState()
@@ -43,9 +44,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        startService(Intent(applicationContext, EventStreamer.getEventService()))
-
-        viewModel.sync(applicationContext)
     }
 }
