@@ -19,6 +19,7 @@ func New(cfg Config, repo *repository.Repository) http.Handler {
 	mux.HandleFunc("GET /healthcheck", withTimeout(5*time.Second, healthcheck))
 
 	mux.HandleFunc("PUT /v1/sync", withDefaultHeaders(withLogs(withTimeout(time.Minute, h.Sync))))
+	mux.HandleFunc("POST /v1/network", withDefaultHeaders(withLogs(withTimeout(time.Minute, h.CreateNetwork))))
 
 	return mux
 }

@@ -2,11 +2,9 @@ package repository
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/mattn/go-sqlite3"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -23,6 +21,10 @@ type node struct {
 }
 
 func (n node) localIPs() []string {
+	if n.localIPString.String == "" {
+		return []string{}
+	}
+
 	return strings.Split(n.localIPString.String, ",")
 }
 
@@ -34,11 +36,7 @@ func New() (*Repository, error) {
 
 	_, err = db.Exec(schema)
 	if err != nil {
-
-		var sqlErr sqlite3.Error
-		if !errors.As(err, &sqlErr) || sqlErr.Code != 1 || sqlErr.ExtendedCode != 1 {
-			return nil, fmt.Errorf("failed to run migration: %w", err)
-		}
+		return nil, fmt.Errorf("failed to run migration: %w", err)
 	}
 
 	return &Repository{db: db}, nil

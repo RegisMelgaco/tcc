@@ -12,10 +12,25 @@ import (
 	"time"
 )
 
-func (r *Repository) Sync(ctx context.Context, input tracker.Node) ([]tracker.Node, error) {
+type SyncInput struct {
+	tracker.Node
+	NetworkSecret string `json:"secret"`
+}
+
+func (r *Repository) Sync(ctx context.Context, input SyncInput) ([]tracker.Node, error) {
 	const operation = "Repository.Sync"
 
-	newNodes, err := r.queryByUpdatedAt(ctx, input.UpdatedAt, input.Email)
+	row := r.db.QueryRowContext(ctx, selectNetwork, input.NetworkSecret)
+	if err := row.Err(); err != nil {
+		return nil, fmt.Errorf("%s: %w", operation, err)
+	}
+
+	var networkID int
+	if err := row.Scan(&networkID); err != nil {
+		return nil, fmt.Errorf("%s: %w", operation, err)
+	}
+
+	newNodes, err := r.queryByUpdatedAt(ctx, input.UpdatedAt, input.Email, networkID)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
@@ -35,9 +50,10 @@ func (r *Repository) Sync(ctx context.Context, input tracker.Node) ([]tracker.No
 	}
 
 	_, err = r.insert(ctx, insertInput{
-		email:    input.Email,
-		publicIP: input.PublicIP,
-		localIPs: input.LocalIPs,
+		email:     input.Email,
+		publicIP:  input.PublicIP,
+		localIPs:  input.LocalIPs,
+		networkID: networkID,
 	})
 
 	if err != nil {
@@ -48,13 +64,16 @@ func (r *Repository) Sync(ctx context.Context, input tracker.Node) ([]tracker.No
 }
 
 type insertInput struct {
-	email    string
-	publicIP string
-	localIPs []string
+	email     string
+	publicIP  string
+	localIPs  []string
+	networkID int
 }
 
 func (i insertInput) equals(n node) bool {
-	return n.email.String == i.email && n.publicIP.String == i.publicIP && slices.Equal(n.localIPs(), i.localIPs)
+	return n.email.String == i.email &&
+		n.publicIP.String == i.publicIP &&
+		slices.Equal(n.localIPs(), i.localIPs)
 }
 
 func (r *Repository) insert(ctx context.Context, input insertInput) (node, error) {
@@ -62,14 +81,14 @@ func (r *Repository) insert(ctx context.Context, input insertInput) (node, error
 
 	logger := logs.FromContext(ctx, operation).With(slog.Time("start", time.Now()))
 
-	stored, err := r.queryNodeByEmail(ctx, input.email)
+	stored, err := r.queryNodeByEmail(ctx, input.email, input.networkID)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return node{}, fmt.Errorf("%s: %w", operation, err)
 		}
 	}
 
-	if !errors.Is(err, sql.ErrNoRows) && input.equals(stored) {
+	if input.equals(stored) {
 		return stored, nil
 	}
 
@@ -110,7 +129,7 @@ func (r *Repository) insert(ctx context.Context, input insertInput) (node, error
 
 	defer stmt.Close()
 
-	row := stmt.QueryRowContext(ctx, input.publicIP, input.email)
+	row := stmt.QueryRowContext(ctx, input.publicIP, input.email, input.networkID)
 	if err = row.Scan(&stored.id, &stored.updatedAt); err != nil {
 		logger.Error("insert node failed", slog.String("query", insertNode), slog.String("err", err.Error()))
 
@@ -134,12 +153,12 @@ func (r *Repository) insert(ctx context.Context, input insertInput) (node, error
 	return stored, nil
 }
 
-func (r *Repository) queryNodeByEmail(ctx context.Context, email string) (node, error) {
+func (r *Repository) queryNodeByEmail(ctx context.Context, email string, networkID int) (node, error) {
 	const operation = "Repository.queryNodeByEmail"
 
 	logger := logs.FromContext(ctx, operation).With(slog.Time("start", time.Now()))
 
-	row := r.db.QueryRowContext(ctx, selectNodeByEmail, email)
+	row := r.db.QueryRowContext(ctx, selectNodeByEmail, email, networkID)
 
 	var result node
 
@@ -154,7 +173,7 @@ func (r *Repository) queryNodeByEmail(ctx context.Context, email string) (node, 
 	return result, nil
 }
 
-func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time, email string) ([]node, error) {
+func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time, email string, networkID int) ([]node, error) {
 	const operation = "Repository.queryByUpdatedAt"
 
 	logger := logs.FromContext(ctx, operation).With(slog.Time("start", time.Now()))
@@ -166,14 +185,14 @@ func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time, e
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
 
-	rows, err := stmt.QueryContext(ctx, updateAt, email)
+	rows, err := stmt.QueryContext(ctx, updateAt, email, networkID)
 	if err != nil {
 		logger.Error("query selectNodeByUpdated failed", slog.String("query", selectNodeByUpdated), slog.String("err", err.Error()))
 
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
 
-	var result []node
+	result := []node{}
 
 	for rows.Next() {
 		var r node
@@ -192,6 +211,8 @@ func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time, e
 
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
+
+	logger.Debug("deu bom", slog.Any("res", result))
 
 	return result, nil
 }

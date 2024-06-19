@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"local/tracker"
 	"local/tracker/logs"
+	"local/tracker/repository"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -22,12 +23,17 @@ type NodeData struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+type SyncInput struct {
+	NodeData
+	NetworkSecret string `json:"network_secret"`
+}
+
 func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {
 	const operation = "Handler.Sync"
 
 	logger := logs.FromContext(r.Context(), operation).With(slog.Time("start", time.Now()))
 
-	var input NodeData
+	var input SyncInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"msg": "invalid json"})
@@ -41,11 +47,14 @@ func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debug("good request", slog.Any("input", input))
 
-	newNodes, err := h.repo.Sync(r.Context(), tracker.Node{
-		Email:     input.Email,
-		PublicIP:  input.PublicIP,
-		LocalIPs:  input.LocalIPs,
-		UpdatedAt: input.UpdatedAt,
+	newNodes, err := h.repo.Sync(r.Context(), repository.SyncInput{
+		Node: tracker.Node{
+			Email:     input.Email,
+			PublicIP:  input.PublicIP,
+			LocalIPs:  input.LocalIPs,
+			UpdatedAt: input.UpdatedAt,
+		},
+		NetworkSecret: input.NetworkSecret,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -58,7 +67,7 @@ func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {
 
 	var output SyncOutput
 
-	output.Self = input
+	output.Self = input.NodeData
 
 	var rs []NodeData
 	for _, n := range newNodes {
