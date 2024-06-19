@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Plantonista</string>
+    <string name="title_activity_user">UserActivity</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
