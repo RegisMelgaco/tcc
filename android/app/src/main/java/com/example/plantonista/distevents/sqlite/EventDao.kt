@@ -14,4 +14,10 @@ interface EventDao {
 
     @Insert
     fun insertAll(events: List<EventEntity>)
+
+    @Query("SELECT author, createdAt FROM event GROUP BY author HAVING MAX(createdAt)")
+    fun getEventStreamHead(): List<EventStreamHead>
+
+    @Query("SELECT * FROM event WHERE createdAt = :createdAt AND author = :author")
+    fun getEventsByEventStreamHead(createdAt: Long, author: String): List<EventEntity>
 }

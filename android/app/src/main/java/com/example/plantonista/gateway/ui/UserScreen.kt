@@ -43,6 +43,7 @@ fun UserScreen(
 
         Button(
             onClick = navigateTeamList,
+            enabled = email.length > 3,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)

@@ -42,9 +42,6 @@ class TCPServer : Service() {
                 Log.d(TAG, "connecting to port: $PORT")
 
                 while (working.get()) {
-                    val events = eventDao.getAll()
-                    Log.d(TAG, "working: $events")
-
                     if (serverSocket != null) {
                         socket = serverSocket!!.accept()
 
@@ -54,24 +51,32 @@ class TCPServer : Service() {
                             val input = Scanner(socket.getInputStream())
                             val output = PrintStream(socket.getOutputStream())
 
-                            val createdAts = gson.fromJson(input.nextLine(), Array<Long>::class.java)
+                            val peerSyncRequest = gson.fromJson(input.nextLine(), SyncEventsRequest::class.java)
 
-                            Log.d(TAG, "received createdAts: $createdAts")
+                            Log.d(TAG, "received createdAts: $peerSyncRequest")
 
-                            output.println(gson.toJson(events.map { it.createdAt }))
+                            val ownSyncRequest = eventDao.getEventStreamHead()
 
-                            val newEvents = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
+                            output.println(gson.toJson(
+                                SyncEventsRequest(ownSyncRequest.map { it.toRequest() })
+                            ))
+
+                            val ownSyncResponse = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
 
                             eventDao.insertAll(
-                                newEvents.map { it.toEntity() }
+                                ownSyncResponse.map { it.toEntity() }
                             )
 
-                            val resp = events
-                                .filter { it.createdAt !in createdAts }
-                                .map { it.toData() }
-                                .toTypedArray()
+                            val peerSyncResponse = mutableListOf<EventData>()
+                            for(head in peerSyncRequest.heads) {
+                                peerSyncResponse.addAll(
+                                    eventDao.getEventsByEventStreamHead(
+                                        head.headDateTime, head.author,
+                                    ).map { it.toData() }
+                                )
+                            }
 
-                            output.println(gson.toJson(resp))
+                            output.println(gson.toJson(peerSyncResponse))
                         }
                     } else {
                         Log.e(TAG, "Couldn't create ServerSocket!")

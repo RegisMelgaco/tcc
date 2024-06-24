@@ -1,12 +1,11 @@
 package com.example.plantonista.gateway.ui
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,34 +34,31 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        viewModel.author.value = getPreferences(Context.MODE_PRIVATE).getString(AUTHOR_KEY, "")
+
         setContent {
             val navController = rememberNavController()
+
+            val hasBack = remember {
+                val state = mutableStateOf(false)
+
+                navController.addOnDestinationChangedListener { controller, _, _ ->
+                    state.value = controller.previousBackStackEntry != null
+                }
+
+                return@remember state
+            }
 
             PlantonistaTheme {
                 Scaffold(
                     topBar = {
                         TopAppBar(title = {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(
+                            Text(
                                     text = "Plantonista",
                                     style = MaterialTheme.typography.headlineMedium
-                                )
-                            }
+                            )
                         },
                         navigationIcon = {
-                            val hasBack = remember {
-                                val state = mutableStateOf(false)
-
-                                navController.addOnDestinationChangedListener { controller, _, _ ->
-                                    state.value = controller.previousBackStackEntry != null
-                                }
-
-                                return@remember state
-                            }
-
                             if (hasBack.value) {
                                 IconButton(onClick = { navController.popBackStack() }) {
                                     Icon(
@@ -90,7 +86,11 @@ class MainActivity : ComponentActivity() {
                                     author = viewModel.author,
                                     onChangeAuthor = { viewModel.author.value = it },
                                     navigateTeamList = {
-                                        viewModel.sync(applicationContext)
+                                        with(getPreferences(MODE_PRIVATE).edit()) {
+                                            putString(AUTHOR_KEY, viewModel.author.value)
+                                            apply()
+                                        }
+
                                         navController.navigate(TEAM_LIST_ROUTE)
                                     },
                                 )
@@ -98,12 +98,18 @@ class MainActivity : ComponentActivity() {
 
                             composable(TEAM_LIST_ROUTE) {
                                 TeamListScreen(
+                                    teams = viewModel.listNetworks(applicationContext),
                                     navigateTeamCreate = { navController.navigate(TEAM_CREATE_ROUTE) },
                                 )
                             }
 
                             composable(TEAM_CREATE_ROUTE) {
-                                TeamCreateScreen()
+                                TeamCreateScreen(
+                                    createNetwork = { name ->
+                                        viewModel.createNetwork(applicationContext, name)
+                                        navController.popBackStack()
+                                    }
+                                )
                             }
                         }
                     }
@@ -116,5 +122,7 @@ class MainActivity : ComponentActivity() {
         private const val USER_ROUTE = "user"
         private const val TEAM_LIST_ROUTE = "team_list"
         private const val TEAM_CREATE_ROUTE = "team_create"
+
+        private const val AUTHOR_KEY = "author"
     }
 }

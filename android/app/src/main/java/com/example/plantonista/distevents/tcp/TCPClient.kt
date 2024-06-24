@@ -2,6 +2,7 @@ package com.example.plantonista.distevents.tcp
 
 import android.util.Log
 import com.example.plantonista.distevents.EventData
+import com.example.plantonista.distevents.sqlite.EventDao
 import com.google.gson.Gson
 import kotlinx.coroutines.withTimeout
 import java.io.PrintStream
@@ -9,10 +10,14 @@ import java.net.Socket
 import java.util.Scanner
 
 
-class TCPClient(private val timeoutMillis: Long) {
+class TCPClient(
+    private val eventDao: EventDao,
+    private val timeoutMillis: Long,
+    private val getLocalEvents: (SyncEventsRequest) -> List<EventData>
+) {
     private val gson = Gson()
 
-    suspend fun sync(address: String, port: Int, events: List<EventData>): List<EventData> {
+    suspend fun sync(address: String, port: Int, request: SyncEventsRequest): List<EventData> {
         var newEvents = arrayOf<EventData>()
 
         withTimeout(timeoutMillis) {
@@ -23,21 +28,24 @@ class TCPClient(private val timeoutMillis: Long) {
                 val input = Scanner(socket.getInputStream())
                 val output = PrintStream(socket.getOutputStream())
 
-                var createdAts = events.map { it.createdAt }
-
-                output.println(gson.toJson(createdAts))
+                output.println(gson.toJson(request))
 
                 Log.d(TAG, "sent")
 
-                createdAts = gson.fromJson(input.nextLine(), Array<Long>::class.java).toList()
+                val peerSyncRequest = gson.fromJson(input.nextLine(), SyncEventsRequest::class.java)
 
-                Log.d(TAG, "received createdAts: $createdAts")
+                Log.d(TAG, "received request: $peerSyncRequest")
 
-                val resp = events
-                    .filter { it.createdAt !in createdAts }
-                    .toTypedArray()
+//                val resp = mutableListOf<EventData>()
+//                for(head in peerSyncRequest.heads) {
+//                    resp.addAll(
+//                        getLocalEvents(peerSyncRequest)
+//                    )
+//                }
 
-                output.println(gson.toJson(resp))
+                output.println(gson.toJson(
+                    getLocalEvents(peerSyncRequest),
+                ))
 
                 newEvents = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
 

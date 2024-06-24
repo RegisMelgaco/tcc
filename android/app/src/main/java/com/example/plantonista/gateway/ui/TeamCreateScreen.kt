@@ -15,10 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.plantonista.distevents.NetworkData
 
 @Preview
 @Composable
-fun TeamCreateScreen() {
+fun TeamCreateScreen(createNetwork: (NetworkData) -> Unit = {}) {
     Column{
         Text(
             text = "Criar time",
@@ -39,8 +40,11 @@ fun TeamCreateScreen() {
             )
         }
 
-        Button(onClick = { /*TODO*/ }) {
-            
+        Button(onClick = {
+            createNetwork(NetworkData(name.value))
+        }, enabled = name.value.length > 3
+        ) {
+            Text(text = "confirmar")
         }
     }
 }

@@ -12,7 +12,7 @@ data class NodeEntity(
     @PrimaryKey
     val email: String,
     val publicIP: String,
-    val updatedAt: String,
+    val updatedAt: Long,
 )
 
 @Entity(

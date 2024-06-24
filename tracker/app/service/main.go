@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const ADDRS = "0.0.0.0:3000"
+const ADDRS = "192.168.1.254:3000"
 
 func main() {
 	logs.EnableDebug()

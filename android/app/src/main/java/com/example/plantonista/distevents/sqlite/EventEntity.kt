@@ -1,7 +1,9 @@
 package com.example.plantonista.distevents.sqlite
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import com.example.plantonista.distevents.EventData
+import com.example.plantonista.distevents.tcp.EventStreamHead
 import com.google.gson.Gson
 
 @Entity("event", primaryKeys = ["author", "createdAt", "type"])
@@ -25,4 +27,11 @@ fun EventData.toEntity(): EventEntity {
     val payload = Gson().toJson(this.payload)
 
     return EventEntity(author, createdAt, type, payload)
+}
+
+data class EventStreamHead(
+    @ColumnInfo("author") val author: String,
+    @ColumnInfo("createdAt") val headDateTime: Long,
+) {
+    fun toRequest() = EventStreamHead(author, headDateTime)
 }
