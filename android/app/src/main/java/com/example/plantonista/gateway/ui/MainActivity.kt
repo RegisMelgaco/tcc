@@ -2,6 +2,8 @@ package com.example.plantonista.gateway.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -13,19 +15,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.plantonista.gateway.ui.ui.theme.PlantonistaTheme
 import com.example.plantonista.viewmodel.MainViewModel
 import com.google.android.material.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -38,7 +46,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-
             val hasBack = remember {
                 val state = mutableStateOf(false)
 
@@ -49,8 +56,14 @@ class MainActivity : ComponentActivity() {
                 return@remember state
             }
 
+            val scope = rememberCoroutineScope()
+            val snackbarHostState = remember { SnackbarHostState() }
+
             PlantonistaTheme {
                 Scaffold(
+                    snackbarHost = {
+                        SnackbarHost(hostState = snackbarHostState)
+                    },
                     topBar = {
                         TopAppBar(title = {
                             Text(
@@ -106,8 +119,27 @@ class MainActivity : ComponentActivity() {
                             composable(TEAM_CREATE_ROUTE) {
                                 TeamCreateScreen(
                                     createNetwork = { name ->
-                                        viewModel.createNetwork(applicationContext, name)
-                                        navController.popBackStack()
+                                        currentFocus?.let { view ->
+                                            val input =
+                                                getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                                            input?.hideSoftInputFromWindow(view.windowToken, 0)
+                                        }
+
+                                        lifecycleScope.launch(Dispatchers.IO) {
+                                            try {
+                                                viewModel.createNetwork(applicationContext, name)
+
+                                                lifecycleScope.launch(Dispatchers.Main) {
+                                                    navController.popBackStack()
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.e(TAG, "failed to create network: $e")
+
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar("falha ao tentar criar time")
+                                                }
+                                            }
+                                        }
                                     }
                                 )
                             }
@@ -118,7 +150,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    companion object Routes {
+    companion object {
+        private val TAG = MainActivity::class.simpleName
+
         private const val USER_ROUTE = "user"
         private const val TEAM_LIST_ROUTE = "team_list"
         private const val TEAM_CREATE_ROUTE = "team_create"

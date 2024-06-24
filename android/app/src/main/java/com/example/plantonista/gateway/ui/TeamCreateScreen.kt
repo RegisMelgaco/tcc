@@ -42,7 +42,8 @@ fun TeamCreateScreen(createNetwork: (NetworkData) -> Unit = {}) {
 
         Button(onClick = {
             createNetwork(NetworkData(name.value))
-        }, enabled = name.value.length > 3
+        }, enabled = name.value.length > 3,
+            modifier = Modifier.padding(top = 16.dp)
         ) {
             Text(text = "confirmar")
         }

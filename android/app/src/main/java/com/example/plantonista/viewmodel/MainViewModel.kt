@@ -28,10 +28,8 @@ class MainViewModel: ViewModel() {
         }
     }
 
-    fun createNetwork(context: Context, data: NetworkData) {
-        CoroutineScope(Dispatchers.IO).launch {
-            getTracker(context).createNetwork(data)
-        }
+    suspend fun createNetwork(context: Context, data: NetworkData) {
+        getTracker(context).createNetwork(data)
     }
 
     fun listNetworks(context: Context): LiveData<List<NetworkData>> {

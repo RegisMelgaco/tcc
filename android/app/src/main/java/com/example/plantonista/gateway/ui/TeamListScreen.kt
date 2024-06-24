@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,7 +44,7 @@ fun TeamListScreen(teams: LiveData<List<NetworkData>> = liveData{}, navigateTeam
                 }
             } else {
                 for (t in teams.value)
-                    Row(Modifier.fillMaxWidth(), Arrangement.Center) {
+                    Row(Modifier.fillMaxWidth().padding(top = 16.dp)) {
                         Text(
                             text = t.name,
                             style = MaterialTheme.typography.headlineMedium
