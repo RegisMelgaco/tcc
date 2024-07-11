@@ -5,17 +5,17 @@ import com.example.plantonista.distevents.EventData
 import com.example.plantonista.distevents.EventFactory
 
 
-interface PlantonistaEvent: Event {
-    fun type(): PlantonistaEventType
-}
+typealias AppEvent = Event<AppEventType>
 
-enum class PlantonistaEventType(val str: String) {
+enum class AppEventType {
+    AddMember
 }
 
 class UnknownEventTypeException(val type: String): Exception()
 
-class EventFactory: EventFactory<PlantonistaEvent> {
-    override fun fromData(data: EventData): PlantonistaEvent = when(data.type) {
+class AppEventFactory: EventFactory<AppEventType> {
+    override fun fromData(data: EventData): AppEvent = when(data.type) {
+        AppEventType.AddMember.toString() -> AddMemberEvent(data.networkName, data.author, data.payload!!["name"] as String, data.payload["email"] as String, data.createdAt)
         else -> throw UnknownEventTypeException(data.type)
     }
 }

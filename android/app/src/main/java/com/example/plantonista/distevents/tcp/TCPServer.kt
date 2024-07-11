@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import androidx.room.Room
-import com.example.plantonista.distevents.EventData
+import com.example.plantonista.distevents.IndexedEventData
 import com.example.plantonista.distevents.sqlite.Database
 import com.example.plantonista.distevents.sqlite.toEntity
 import com.google.gson.Gson
@@ -55,24 +55,24 @@ class TCPServer : Service() {
 
                             Log.d(TAG, "received createdAts: $peerSyncRequest")
 
-                            val ownSyncRequest = eventDao.getEventStreamHead()
+                            val ownSyncRequest = eventDao.getEventStreamHead(peerSyncRequest.networkName)
 
                             output.println(gson.toJson(
-                                SyncEventsRequest(ownSyncRequest.map { it.toRequest() })
+                                SyncEventsRequest(peerSyncRequest.networkName, ownSyncRequest.map { it.toRequest() })
                             ))
 
-                            val ownSyncResponse = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
+                            val ownSyncResponse = gson.fromJson(input.nextLine(), Array<IndexedEventData>::class.java)
 
                             eventDao.insertAll(
                                 ownSyncResponse.map { it.toEntity() }
                             )
 
-                            val peerSyncResponse = mutableListOf<EventData>()
+                            val peerSyncResponse = mutableListOf<IndexedEventData>()
                             for(head in peerSyncRequest.heads) {
                                 peerSyncResponse.addAll(
                                     eventDao.getEventsByEventStreamHead(
-                                        head.headDateTime, head.author,
-                                    ).map { it.toData() }
+                                        head.networkName, head.index, head.author,
+                                    ).map { it.toIndexedData() }
                                 )
                             }
 

@@ -1,8 +1,7 @@
 package com.example.plantonista.distevents.tcp
 
 import android.util.Log
-import com.example.plantonista.distevents.EventData
-import com.example.plantonista.distevents.sqlite.EventDao
+import com.example.plantonista.distevents.IndexedEventData
 import com.google.gson.Gson
 import kotlinx.coroutines.withTimeout
 import java.io.PrintStream
@@ -11,16 +10,14 @@ import java.util.Scanner
 
 
 class TCPClient(
-    private val eventDao: EventDao,
-    private val timeoutMillis: Long,
-    private val getLocalEvents: (SyncEventsRequest) -> List<EventData>
+    private val getLocalEvents: (SyncEventsRequest) -> List<IndexedEventData>
 ) {
     private val gson = Gson()
 
-    suspend fun sync(address: String, port: Int, request: SyncEventsRequest): List<EventData> {
-        var newEvents = arrayOf<EventData>()
+    suspend fun sync(address: String, port: Int, request: SyncEventsRequest): List<IndexedEventData> {
+        var newEvents = arrayOf<IndexedEventData>()
 
-        withTimeout(timeoutMillis) {
+        withTimeout(TIMEOUT_MS) {
             Log.d(TAG, "sync started")
 
             try {
@@ -36,18 +33,11 @@ class TCPClient(
 
                 Log.d(TAG, "received request: $peerSyncRequest")
 
-//                val resp = mutableListOf<EventData>()
-//                for(head in peerSyncRequest.heads) {
-//                    resp.addAll(
-//                        getLocalEvents(peerSyncRequest)
-//                    )
-//                }
-
                 output.println(gson.toJson(
                     getLocalEvents(peerSyncRequest),
                 ))
 
-                newEvents = gson.fromJson(input.nextLine(), Array<EventData>::class.java)
+                newEvents = gson.fromJson(input.nextLine(), Array<IndexedEventData>::class.java)
 
                 socket.close()
             } catch (e: Exception) {
@@ -60,5 +50,6 @@ class TCPClient(
 
     companion object {
         private val TAG = TCPClient::class.java.simpleName
+        private const val TIMEOUT_MS = 5000L
     }
 }

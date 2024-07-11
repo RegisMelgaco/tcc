@@ -21,7 +21,7 @@ class Network(
     private val networkDao: NetworkDao,
     private val nodeDao: NodeDao,
     val name: String,
-    val user: String,
+    private val author: String,
 ) {
     suspend fun getNeighboursAddresses(): List<String> {
         val nodes = mutableListOf<NodeData>()
@@ -52,7 +52,7 @@ class Network(
 
             val resp = client.sync(
                 SyncInput(
-                    user,
+                    author,
                     localIPs,
                     network.updatedNodesAt,
                     network.secret
@@ -93,7 +93,7 @@ class Network(
 
             val now = System.currentTimeMillis() / 1000L
 
-            self = NodeData(user, String(buff,0, read), now, localIPs)
+            self = NodeData(author, String(buff,0, read), now, localIPs)
         }
 
         val addresses = mutableListOf<String>()
@@ -113,6 +113,5 @@ class Network(
 
     companion object {
         private val TAG = Network::class.simpleName
-        private const val LAST_NODE_UPDATE = "LAST_NODE_UPDATE"
     }
 }
