@@ -6,9 +6,10 @@ import (
 	"local/tracker/repository"
 	"log/slog"
 	"net/http"
-)
+	"os"
 
-const ADDRS = "192.168.1.254:3000"
+	_ "github.com/joho/godotenv/autoload"
+)
 
 func main() {
 	logs.EnableDebug()
@@ -24,7 +25,12 @@ func main() {
 
 	h := handler.New(handler.Config{Debug: true}, repo)
 
-	slog.Info("start listening", slog.String("addrs", ADDRS))
+	addrs := os.Getenv("ADDRS")
+	if addrs == "" {
+		addrs = "0.0.0.0:3000"
+	}
 
-	http.ListenAndServe(ADDRS, h)
+	slog.Info("start listening", slog.String("addrs", addrs))
+
+	http.ListenAndServe(addrs, h)
 }

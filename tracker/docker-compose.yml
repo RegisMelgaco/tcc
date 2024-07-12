@@ -2,6 +2,6 @@ services:
   api:
     build: .
     ports:
-      - 3000:3000
-    volumes:
-      - .:/usr/src/app
+      - 8000:8000
+    environment:
+      - ADDRS=0.0.0.0:8000
