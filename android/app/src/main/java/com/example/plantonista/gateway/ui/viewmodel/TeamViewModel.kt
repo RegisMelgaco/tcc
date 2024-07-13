@@ -16,6 +16,7 @@ class TeamViewModel(
     fun setup(context: Context, networkName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             GlobalStreamer.setup(context, networkName, getUsername(context))
+            memberState.cleanUp()
             GlobalStreamer.stream(memberState.handle)
         }
     }

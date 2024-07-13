@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,11 +28,13 @@ fun TeamMemberListScreen(
     viewModel: TeamMemberListViewModel = viewModel(),
     navigateMemberCreate: () -> Unit = {},
 ) {
+    val scrollState = rememberScrollState()
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxHeight()
+            .verticalScroll(scrollState)
     ) {
         val members by viewModel.members.collectAsStateWithLifecycle()
 

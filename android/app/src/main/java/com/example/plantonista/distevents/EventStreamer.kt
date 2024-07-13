@@ -109,7 +109,7 @@ class EventStreamer<T>(
         }
 
         val indexedEvent = IndexedEventData(event.toData(), ownEvents.size)
-        othersHeads[author]?.index = indexedEvent.index
+        ownEvents += event
         eventDao.insertAll(listOf(indexedEvent.toEntity()))
 
         return true

@@ -146,15 +146,16 @@ fun TeamScreen(
                     }
                     composable(MEMBER_CREATE_ROUTE) {
                         MemberCreateScreen(
-                            onConfirm = { msg ->
-                                if (msg != null) {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(msg)
-                                    }
-                                } else {
+                            onConfirm = {
+                                scope.launch {
                                     navController.popBackStack()
                                 }
                             },
+                            onError = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(it)
+                                }
+                            }
                         )
                     }
                 }

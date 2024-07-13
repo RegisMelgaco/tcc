@@ -37,8 +37,11 @@ object GlobalStreamer {
         }
 
         streamer = EventStreamer(context, networkName, username, AppEventFactory(), GlobalMemberState.validate)
+
+        isStreaming = false
     }
 
+    private var isStreaming = false
     fun stream(handler: EventHandler<AppEventType>) {
         try {
             streamer!!.stream(handler)

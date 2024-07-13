@@ -16,17 +16,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.plantonista.gateway.ui.theme.PlantonistaTheme
 import com.example.plantonista.gateway.ui.viewmodel.MemberCreateViewModel
-import com.example.plantonista.state.EmailInUseException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemberCreateScreen(
     viewModel: MemberCreateViewModel = viewModel(),
-    onConfirm : (String?) -> Unit = {},
+    onConfirm : () -> Unit = {},
+    onError: (String) -> Unit = {},
 ) {
     PlantonistaTheme {
         Scaffold(
@@ -63,16 +64,13 @@ fun MemberCreateScreen(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
 
+                    val keyboardController = LocalSoftwareKeyboardController.current
+
                     Button(
                         onClick = {
-                            var errorMsg: String? = null
-                            try {
-                                viewModel.createMember(name, email)
-                            } catch (e: EmailInUseException) {
-                                errorMsg = "email escolhido já está em uso"
-                            }
+                            keyboardController?.hide()
 
-                            onConfirm(errorMsg)
+                            viewModel.createMember(name, email, onConfirm, onError)
                         },
                         enabled = name.length > 3 && email.length > 3,
                         modifier = Modifier

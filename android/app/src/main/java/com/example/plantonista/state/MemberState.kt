@@ -15,6 +15,10 @@ open class MemberState {
 
     private val _members = MutableStateFlow<MutableList<Member>>(mutableListOf())
 
+    fun cleanUp() {
+        _members.value.clear()
+    }
+
     val handle: EventHandler<AppEventType> = mapOf(
         AppEventType.AddMember to { e ->
             val event = e as AddMemberEvent
@@ -25,10 +29,15 @@ open class MemberState {
     )
 
     val validate: EventValidator<AppEventType> = mapOf(
-        AppEventType.AddMember to { e ->
-            val event = e as AddMemberEvent
+        AppEventType.AddMember to { event ->
+            event as AddMemberEvent
 
-            members.value.firstOrNull { it.email == event.email } == null
+            val isInUse = members.value.firstOrNull { it.email == event.email } != null
+            if (isInUse) {
+                throw EmailInUseException(event.email)
+            }
+
+            true
         }
     )
 
@@ -38,3 +47,5 @@ open class MemberState {
 }
 
 object GlobalMemberState: MemberState()
+
+class EmailInUseException(val email: String): Exception("email '$email' is in use")
