@@ -25,7 +25,7 @@ type NodeData struct {
 
 type SyncInput struct {
 	NodeData
-	NetworkSecret string `json:"network_secret"`
+	NetworkSecret string `json:"networkSecret"`
 }
 
 func (h Handler) Sync(w http.ResponseWriter, r *http.Request) {

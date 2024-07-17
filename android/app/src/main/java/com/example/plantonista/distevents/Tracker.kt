@@ -15,6 +15,7 @@ import com.example.plantonista.distevents.tcp.TCPClient
 import com.example.plantonista.distevents.tcp.TCPServer
 import com.example.plantonista.distevents.tracker.CreateNetworkInput
 import com.example.plantonista.distevents.tracker.TrackerService
+import kotlinx.coroutines.runBlocking
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -41,25 +42,27 @@ class Tracker(
     }
 
     suspend fun createNetwork(data: NetworkData) {
-        val secret = (1..20)
-            .map { (('A'..'Z') + ('a'..'z') + ('0'..'9')).random() }
-            .joinToString("")
+        runBlocking {
+            val secret = (1..20)
+                .map { (('A'..'Z') + ('a'..'z') + ('0'..'9')).random() }
+                .joinToString("")
 
-        try {
-            client.createNetwork(CreateNetworkInput(secret, data.name))
-        } catch (e: HttpException) {
-            if (e.code() == 400) {
-                throw InvalidNetworkNameException(data.name)
+            try {
+                client.createNetwork(CreateNetworkInput(secret, data.name))
+            } catch (e: HttpException) {
+                if (e.code() == 400) {
+                    throw InvalidNetworkNameException(data.name)
+                }
+
+                throw e
             }
 
-            throw e
+            val now = System.currentTimeMillis() / 1000L
+
+            val network = NetworkEntity(name = data.name, secret = secret, updatedNodesAt = now)
+
+            networkDao.create(network)
         }
-
-        val now = System.currentTimeMillis() / 1000L
-
-        val network = NetworkEntity(name = data.name, secret = secret, updatedNodesAt = now)
-
-        networkDao.create(network)
     }
 
     fun getNetwork(name: String, author: String) = Network(client, networkDao, nodeDao, name, author)
