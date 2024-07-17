@@ -15,14 +15,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -36,10 +32,8 @@ import com.example.plantonista.R
 import com.example.plantonista.gateway.ui.theme.PlantonistaTheme
 import com.example.plantonista.gateway.ui.viewmodel.TeamViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 const val MEMBERS_ROUTE = "members"
-const val MEMBER_CREATE_ROUTE = "member_create"
 const val SHIFTS_ROUTE = "shifts"
 const val PAYMENT_ROUTE = "payment"
 
@@ -49,11 +43,11 @@ fun TeamScreen(
     viewModel: TeamViewModel = viewModel(),
     name: String = "UTI 3",
     back: () -> Unit = {},
+    navigateMemberCreate: () -> Unit = {},
+    navigateShiftCreate: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Dispatchers.IO) {
         viewModel.setup(context, name)
@@ -61,9 +55,6 @@ fun TeamScreen(
 
     PlantonistaTheme {
         Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            },
             topBar = {
                 TopAppBar(
                     title = {
@@ -135,28 +126,16 @@ fun TeamScreen(
                 NavHost(navController = navController, startDestination = SHIFTS_ROUTE) {
                     composable(MEMBERS_ROUTE) {
                         TeamMemberListScreen(
-                            navigateMemberCreate = { navController.navigate(MEMBER_CREATE_ROUTE) },
+                            navigateMemberCreate = navigateMemberCreate,
                         )
                     }
                     composable(SHIFTS_ROUTE) {
-                        ShiftsScreen()
+                        ShiftsScreen(
+                            navigateShiftCreate = navigateShiftCreate
+                        )
                     }
                     composable(PAYMENT_ROUTE) {
                         PaymentScreen()
-                    }
-                    composable(MEMBER_CREATE_ROUTE) {
-                        MemberCreateScreen(
-                            onConfirm = {
-                                scope.launch {
-                                    navController.popBackStack()
-                                }
-                            },
-                            onError = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(it)
-                                }
-                            }
-                        )
                     }
                 }
             }

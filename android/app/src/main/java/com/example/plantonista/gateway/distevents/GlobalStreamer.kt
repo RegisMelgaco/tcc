@@ -8,6 +8,7 @@ import com.example.plantonista.distevents.EventStreamer
 import com.example.plantonista.event.AppEventFactory
 import com.example.plantonista.event.AppEventType
 import com.example.plantonista.state.GlobalMemberState
+import com.example.plantonista.state.GlobalShiftState
 
 object GlobalStreamer {
     private var streamer: EventStreamer<AppEventType>? = null
@@ -36,7 +37,13 @@ object GlobalStreamer {
             Log.d(TAG, "replacing old streamer: networkName=${streamer?.networkName}")
         }
 
-        streamer = EventStreamer(context, networkName, username, AppEventFactory(), GlobalMemberState.validate)
+        streamer = EventStreamer(
+            context,
+            networkName,
+            username,
+            AppEventFactory(),
+            GlobalMemberState.validate + GlobalShiftState.validate
+        )
 
         isStreaming = false
     }

@@ -40,7 +40,7 @@ class Tracker(
         eventDao = db.eventDao()
     }
 
-    suspend fun createNetwork(data: NetworkData): NetworkData {
+    suspend fun createNetwork(data: NetworkData) {
         val secret = (1..20)
             .map { (('A'..'Z') + ('a'..'z') + ('0'..'9')).random() }
             .joinToString("")
@@ -60,11 +60,9 @@ class Tracker(
         val network = NetworkEntity(name = data.name, secret = secret, updatedNodesAt = now)
 
         networkDao.create(network)
-
-        return network.toData()
     }
 
-    fun getNetwork(name: String, user: String) = Network(client, networkDao, nodeDao, name, user)
+    fun getNetwork(name: String, author: String) = Network(client, networkDao, nodeDao, name, author)
 
     fun listNetworks() = networkDao.getAll().map { it.toData() }
 

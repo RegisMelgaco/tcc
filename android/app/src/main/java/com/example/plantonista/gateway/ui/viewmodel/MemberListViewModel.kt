@@ -6,7 +6,7 @@ import com.example.plantonista.state.GlobalMemberState
 import com.example.plantonista.state.MemberState
 import kotlinx.coroutines.flow.StateFlow
 
-class TeamMemberListViewModel(private val memberState: MemberState = GlobalMemberState): ViewModel() {
+class MemberListViewModel(private val memberState: MemberState = GlobalMemberState): ViewModel() {
     val members: StateFlow<List<Member>>
         get() = memberState.members
 }

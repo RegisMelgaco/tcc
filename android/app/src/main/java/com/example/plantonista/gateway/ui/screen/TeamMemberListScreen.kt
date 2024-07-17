@@ -20,12 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.plantonista.gateway.ui.viewmodel.TeamMemberListViewModel
+import com.example.plantonista.gateway.ui.viewmodel.MemberListViewModel
 
 
 @Composable
 fun TeamMemberListScreen(
-    viewModel: TeamMemberListViewModel = viewModel(),
+    viewModel: MemberListViewModel = viewModel(),
     navigateMemberCreate: () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
