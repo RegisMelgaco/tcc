@@ -3,6 +3,7 @@ package com.example.plantonista.gateway.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,7 +27,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            val back: () -> Unit = { navController.popBackStack() }
+            val scope = rememberCoroutineScope()
+            val back: () -> Unit = {
+                scope.launch { navController.popBackStack() }
+            }
 
             NavHost(
                 navController = navController,

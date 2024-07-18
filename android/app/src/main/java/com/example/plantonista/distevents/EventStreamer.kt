@@ -29,14 +29,14 @@ class EventStreamer<T>(
 ) {
     private val eventDao: EventDao
     private val othersHeads = mutableMapOf<String, EventStreamHead>()
-    private val ownEvents = mutableListOf<Event<T>>()
+    private val ownEvents = mutableListOf<IndexedEventData>()
     private var handler: EventHandler<T>? = null
 
     init {
         val db = Room.databaseBuilder(context, Database::class.java, "dist_events").build()
         eventDao = db.eventDao()
 
-        ownEvents.addAll(eventDao.getWhereNewer(networkName, author, -1).map { factory.fromData(it.toIndexedData().data) })
+        ownEvents.addAll(eventDao.getWhereNewer(networkName, author, -1).map { it.toIndexedData() })
 
         Log.i(TAG, "created with ownEvents $ownEvents")
 
@@ -63,12 +63,8 @@ class EventStreamer<T>(
 
         Log.i(TAG, "start streaming with types $types and own events $ownEvents")
 
-        for (entity in eventDao.getWhereNewer(networkName, author, -1, types)) {
-            val event = factory.fromData(entity.toIndexedData().data)
-            handler[event.getType()]?.let { it(event) }
-        }
-
-        for (event in ownEvents) {
+        for (d in ownEvents) {
+            val event = factory.fromData(d.data)
             handler[event.getType()]?.let { it(event) }
         }
 
@@ -99,24 +95,25 @@ class EventStreamer<T>(
             return false
         }
 
+        val indexedEvent = IndexedEventData(event.toData(), ownEvents.size + 1)
+
+        ownEvents += indexedEvent
+        eventDao.insertAll(listOf(indexedEvent.toEntity()))
+
         if (handler != null) {
             val t = event.getType()
             handler?.get(t)?.let {
                 it(event)
             }
         } else {
-            ownEvents.add(event)
+            ownEvents.add(indexedEvent)
         }
-
-        val indexedEvent = IndexedEventData(event.toData(), ownEvents.size)
-        ownEvents += event
-        eventDao.insertAll(listOf(indexedEvent.toEntity()))
 
         return true
     }
 
     companion object {
-        const val DEFAULT_DELAY = 5_000L
+        const val DEFAULT_DELAY = 60_000L
         private val TAG = EventStreamer::class.simpleName
     }
 }

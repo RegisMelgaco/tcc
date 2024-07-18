@@ -9,7 +9,7 @@ import com.example.plantonista.event.AppEventType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-open class ShiftState(private val memberState: MemberState) {
+open class ShiftState(val memberState: MemberState) {
     val shifts: StateFlow<List<Shift>>
         get() = _shifts
 
@@ -41,9 +41,9 @@ open class ShiftState(private val memberState: MemberState) {
 
             for (shift in shifts.value.filter { it.memberEmail == event.memberEmail }) {
                 val eventEnd = event.start + event.durationMin * 60 // unix time
-                val shiftEnd = shift.start + shift.durationMin * 60 // unix time
+                val shiftEnd = shift.endUnix // unix time
 
-                val hasOverlap = shift.start in event.start .. eventEnd || shiftEnd in event.start .. eventEnd
+                val hasOverlap = shift.startUnix in event.start .. eventEnd || shiftEnd in event.start .. eventEnd
 
                 if (hasOverlap) {
                     throw ShiftHasTimeConflictException(event, shift)

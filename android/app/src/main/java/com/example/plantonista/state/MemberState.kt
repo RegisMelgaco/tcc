@@ -46,7 +46,7 @@ open class MemberState {
         AppEventType.AddMember to { event ->
             event as AddMemberEvent
 
-            if (!authorIsAdmin(event.author)) {
+            if (!authorIsAdmin(event.author) && members.value.isNotEmpty()) {
                 throw AuthorIsNotAdminException(event.author)
             }
 
