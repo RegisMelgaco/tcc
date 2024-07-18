@@ -14,6 +14,7 @@ import com.example.plantonista.Configs
 import com.example.plantonista.distevents.Tracker
 import com.example.plantonista.gateway.ui.screen.MemberCreateScreen
 import com.example.plantonista.gateway.ui.screen.ShiftCreateScreen
+import com.example.plantonista.gateway.ui.screen.TeamCodeScreen
 import com.example.plantonista.gateway.ui.screen.TeamCreateScreen
 import com.example.plantonista.gateway.ui.screen.TeamListScreen
 import com.example.plantonista.gateway.ui.screen.TeamScreen
@@ -75,6 +76,9 @@ class MainActivity : ComponentActivity() {
                         navigateShiftCreate = {
                             navController.navigate(SHIFT_CREATE_ROUTE)
                         },
+                        navigateTeamCode = {
+                            navController.navigate(TEAM_CODE_ROUTE)
+                        }
                     )
                 }
                 composable(MEMBER_CREATE_ROUTE) {
@@ -82,6 +86,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(SHIFT_CREATE_ROUTE) {
                     ShiftCreateScreen(back = back)
+                }
+                composable(TEAM_CODE_ROUTE) {
+                    TeamCodeScreen(back = back)
                 }
             }
         }
@@ -92,6 +99,7 @@ class MainActivity : ComponentActivity() {
         private const val TEAM_LIST_ROUTE = "team_list"
         private const val TEAM_CREATE_ROUTE = "team_create"
         private const val TEAM_ROUTE = "team/{name}"
+        private const val TEAM_CODE_ROUTE = "team_code"
         private const val SHIFT_CREATE_ROUTE = "shift_create"
         private const val MEMBER_CREATE_ROUTE = "member_create"
     }

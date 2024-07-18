@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,6 +46,7 @@ fun TeamScreen(
     back: () -> Unit = {},
     navigateMemberCreate: () -> Unit = {},
     navigateShiftCreate: () -> Unit = {},
+    navigateTeamCode: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -69,6 +71,15 @@ fun TeamScreen(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 painter = painterResource(R.drawable.baseline_arrow_back_24),
                                 contentDescription = "voltar a tela anterior"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = navigateTeamCode) {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                contentDescription = "ir a tela de qr code do time",
+                                imageVector = Icons.Rounded.QrCode2
                             )
                         }
                     }
