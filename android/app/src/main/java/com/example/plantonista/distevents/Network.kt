@@ -14,6 +14,7 @@ import java.net.URL
 
 data class NetworkData(
     val name: String,
+    val secret: String
 )
 
 class Network(

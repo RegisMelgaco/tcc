@@ -32,9 +32,14 @@ class EventStreamer<T>(
     private val ownEvents = mutableListOf<IndexedEventData>()
     private var handler: EventHandler<T>? = null
 
+    val networkData: NetworkData
+
     init {
         val db = Room.databaseBuilder(context, Database::class.java, "dist_events").build()
         eventDao = db.eventDao()
+        val networkDao = db.networkDao()
+
+        networkData = networkDao.getByName(networkName).toData()
 
         ownEvents.addAll(eventDao.getWhereNewer(networkName, author, -1).map { it.toIndexedData() })
 

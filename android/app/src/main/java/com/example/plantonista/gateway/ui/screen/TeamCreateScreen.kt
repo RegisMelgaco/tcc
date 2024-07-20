@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.plantonista.R
-import com.example.plantonista.distevents.NetworkData
 import com.example.plantonista.gateway.ui.theme.PlantonistaTheme
 import com.example.plantonista.gateway.ui.viewmodel.TeamCreateViewModel
 import kotlinx.coroutines.Dispatchers
@@ -107,7 +106,7 @@ fun TeamCreateScreen(
 
                             scope.launch(Dispatchers.IO) {
                                 try {
-                                    viewModel.createNetwork(context, NetworkData(name))
+                                    viewModel.createNetwork(context, name)
                                     scope.launch(Dispatchers.Main) {
                                         back()
                                     }

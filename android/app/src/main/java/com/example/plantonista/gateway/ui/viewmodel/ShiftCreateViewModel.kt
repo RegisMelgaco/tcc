@@ -30,7 +30,7 @@ class ShiftCreateViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 GlobalStreamer.submit(
-                    AddShiftEvent(GlobalStreamer.networkName, GlobalStreamer.author, members.value[memberIndex].email, start, durationMin)
+                    AddShiftEvent(GlobalStreamer.networkData.name, GlobalStreamer.author, members.value[memberIndex].email, start, durationMin)
                 )
 
                 onSuccess()

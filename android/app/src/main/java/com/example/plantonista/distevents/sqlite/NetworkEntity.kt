@@ -11,5 +11,5 @@ data class NetworkEntity(
     val secret: String,
     val updatedNodesAt: Long
 ) {
-    fun toData() = NetworkData(name)
+    fun toData() = NetworkData(name, secret)
 }

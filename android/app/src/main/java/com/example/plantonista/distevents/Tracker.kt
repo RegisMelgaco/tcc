@@ -41,17 +41,17 @@ class Tracker(
         eventDao = db.eventDao()
     }
 
-    suspend fun createNetwork(data: NetworkData) {
+    suspend fun createNetwork(name: String) {
         runBlocking {
             val secret = (1..20)
                 .map { (('A'..'Z') + ('a'..'z') + ('0'..'9')).random() }
                 .joinToString("")
 
             try {
-                client.createNetwork(CreateNetworkInput(secret, data.name))
+                client.createNetwork(CreateNetworkInput(secret, name))
             } catch (e: HttpException) {
                 if (e.code() == 400) {
-                    throw InvalidNetworkNameException(data.name)
+                    throw InvalidNetworkNameException(name)
                 }
 
                 throw e
@@ -59,10 +59,14 @@ class Tracker(
 
             val now = System.currentTimeMillis() / 1000L
 
-            val network = NetworkEntity(name = data.name, secret = secret, updatedNodesAt = now)
+            val network = NetworkEntity(name = name, secret = secret, updatedNodesAt = now)
 
             networkDao.create(network)
         }
+    }
+
+    fun saveNetwork(name: String, secret: String) {
+        networkDao.create(NetworkEntity(name, secret, 0))
     }
 
     fun getNetwork(name: String, author: String) = Network(client, networkDao, nodeDao, name, author)

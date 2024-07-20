@@ -66,7 +66,8 @@ fun TeamCodeScreen(
                     .fillMaxWidth()
                     .fillMaxHeight(),
                 ) {
-                val bitmap = rememberQrBitmapPainter(content = "eu sou um qr code safado")
+                val bitmap = rememberQrBitmapPainter(content = viewModel.qrCodeData)
+
                 Image(painter = bitmap, contentDescription = "QR code para ingressar no time")
             }
         }

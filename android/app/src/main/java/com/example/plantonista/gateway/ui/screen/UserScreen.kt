@@ -30,7 +30,7 @@ import com.example.plantonista.gateway.ui.viewmodel.UserViewModel
 @Composable
 fun UserScreen(
     viewModel: UserViewModel = viewModel(),
-    onConfirm : (username: String) -> Unit = {},
+    onConfirm : () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -72,7 +72,7 @@ fun UserScreen(
                     Button(
                         onClick = {
                             viewModel.saveUsername(context, username)
-                            onConfirm(username)
+                            onConfirm()
                         },
                         enabled = username.length > 3,
                         modifier = Modifier

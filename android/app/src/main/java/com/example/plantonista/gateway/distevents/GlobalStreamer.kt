@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.plantonista.distevents.Event
 import com.example.plantonista.distevents.EventHandler
 import com.example.plantonista.distevents.EventStreamer
+import com.example.plantonista.distevents.NetworkData
 import com.example.plantonista.event.AppEventFactory
 import com.example.plantonista.event.AppEventType
 import com.example.plantonista.state.GlobalMemberState
@@ -13,10 +14,10 @@ import com.example.plantonista.state.GlobalShiftState
 object GlobalStreamer {
     private var streamer: EventStreamer<AppEventType>? = null
 
-    val networkName: String
+    val networkData: NetworkData
         get() {
             try {
-                return streamer!!.networkName
+                return streamer!!.networkData
             } catch (e: Exception) {
                 throw StreamerNotSetup()
             }

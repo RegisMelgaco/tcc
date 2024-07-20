@@ -1,6 +1,7 @@
 package com.example.plantonista.gateway.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +27,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.d(TAG, "${intent.data?.path}")
+
+        if (intent.data?.path == "/enter_team") {
+            Log.d(TAG, intent.data?.queryParameterNames.toString())
+            Log.d(TAG, intent.data?.getQueryParameter("name") ?: "nil")
+
+            val name = intent.data!!.getQueryParameter("name")!!
+            val secret = intent.data!!.getQueryParameter("secret")!!
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                Tracker(applicationContext, Configs.TRACKER_ADDRESS).saveNetwork(name, secret)
+            }
+        }
+
         setContent {
             val navController = rememberNavController()
             val scope = rememberCoroutineScope()
@@ -39,11 +54,8 @@ class MainActivity : ComponentActivity() {
             ) {
                 composable(USER_ROUTE) {
                     UserScreen(
-                        onConfirm = { username ->
+                        onConfirm = {
                             navController.navigate(TEAM_LIST_ROUTE)
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                Tracker(applicationContext, Configs.TRACKER_ADDRESS).syncEvents(username)
-                            }
                         },
                     )
                 }
@@ -95,6 +107,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        private val TAG = MainActivity::class.simpleName
         private const val USER_ROUTE = "user"
         private const val TEAM_LIST_ROUTE = "team_list"
         private const val TEAM_CREATE_ROUTE = "team_create"

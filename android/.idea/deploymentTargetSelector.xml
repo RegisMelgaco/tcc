@@ -4,16 +4,22 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-07-10T21:15:59.769524528Z">
+        <DropdownSelection timestamp="2024-07-20T12:35:29.128769212Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=NBAIB6000918SEX" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/regis/.android/avd/Pixel_3a_API_34_extension_level_7_x86_64.avd" />
             </handle>
           </Target>
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="ShiftCreateScreen">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="MainActivity">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="add team">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

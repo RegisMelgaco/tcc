@@ -18,7 +18,7 @@ class MemberCreateViewModel: ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 GlobalStreamer.submit(
-                    AddMemberEvent(GlobalStreamer.networkName, GlobalStreamer.author, name, email)
+                    AddMemberEvent(GlobalStreamer.networkData.name, GlobalStreamer.author, name, email)
                 )
 
                 onSuccess()
