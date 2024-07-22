@@ -22,27 +22,12 @@
             android:name=".gateway.ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Plantonista">
+
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-
-                <data
-                    android:scheme="plantonista"
-                    android:host="enter_team" />
             </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="https" />
-                <data android:host="plantonista.regismelgaco.co" />
-                <data android:pathPattern="/addmember" />
-            </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
