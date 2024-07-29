@@ -41,7 +41,7 @@ func (r *Repository) Sync(ctx context.Context, input SyncInput) ([]tracker.Node,
 			Email:     n.email.String,
 			PublicIP:  n.publicIP.String,
 			LocalIPs:  n.localIPs(),
-			UpdatedAt: n.updatedAt.Time,
+			UpdatedAt: int(n.updatedAt.Int64),
 		})
 	}
 
@@ -173,7 +173,7 @@ func (r *Repository) queryNodeByEmail(ctx context.Context, email string, network
 	return result, nil
 }
 
-func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt time.Time, email string, networkID int) ([]node, error) {
+func (r *Repository) queryByUpdatedAt(ctx context.Context, updateAt int, email string, networkID int) ([]node, error) {
 	const operation = "Repository.queryByUpdatedAt"
 
 	logger := logs.FromContext(ctx, operation).With(slog.Time("start", time.Now()))

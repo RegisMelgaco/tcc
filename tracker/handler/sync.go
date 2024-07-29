@@ -17,10 +17,10 @@ type SyncOutput struct {
 }
 
 type NodeData struct {
-	Email     string    `json:"email"`
-	PublicIP  string    `json:"publicIP"`
-	LocalIPs  []string  `json:"localIPs"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	Email     string   `json:"email"`
+	PublicIP  string   `json:"publicIP"`
+	LocalIPs  []string `json:"localIPs"`
+	UpdatedAt int      `json:"updatedAt"`
 }
 
 type SyncInput struct {

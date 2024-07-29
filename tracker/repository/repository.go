@@ -16,7 +16,7 @@ type node struct {
 	email         sql.NullString
 	publicIP      sql.NullString
 	localIPString sql.NullString
-	updatedAt     sql.NullTime
+	updatedAt     sql.NullInt64
 	id            sql.NullInt64
 }
 
