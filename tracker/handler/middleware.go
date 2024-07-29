@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"bytes"
 	"context"
-	"io"
 	"local/tracker/logs"
 	"log/slog"
 	"net/http"
