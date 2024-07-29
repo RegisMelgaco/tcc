@@ -8,6 +8,6 @@ class TeamCodeViewModel: ViewModel() {
         get() {
             val net = GlobalStreamer.networkData
 
-            return """plantonista://regismelgaco.co/enter_team?name="${net.name}"&secret="${net.secret}""""
+            return """https://www.plataformaplantonista.com/enter_team?name=${net.name}&secret=${net.secret}"""
         }
 }

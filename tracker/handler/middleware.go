@@ -23,16 +23,12 @@ func withLogs(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		buf, _ := io.ReadAll(r.Body)
-		r.Body = io.NopCloser(bytes.NewBuffer(buf))
-
 		logger := logs.New().
 			With(
 				slog.Time("start", start),
 				slog.String("path", r.URL.Path),
 				slog.String("method", r.Method),
 				slog.String("user_agent", r.UserAgent()),
-				slog.String("body", string(buf)),
 			)
 
 		logger.Debug("started handling request")

@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.rounded.AddComment
+import androidx.compose.material.icons.rounded.ModeComment
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +49,7 @@ fun TeamScreen(
     navigateMemberCreate: () -> Unit = {},
     navigateShiftCreate: () -> Unit = {},
     navigateTeamCode: () -> Unit = {},
+    navigateNotifications: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -75,6 +78,13 @@ fun TeamScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = navigateNotifications) {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                contentDescription = "ir a tela de notificações",
+                                imageVector = Icons.Rounded.ModeComment
+                            )
+                        }
                         IconButton(onClick = navigateTeamCode) {
                             Icon(
                                 modifier = Modifier.padding(horizontal = 8.dp),

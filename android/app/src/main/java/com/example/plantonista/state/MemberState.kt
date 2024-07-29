@@ -76,6 +76,12 @@ open class MemberState {
     fun hasMember(email: String) =
         members.value.firstOrNull { it.email == email } != null
 
+    fun getName(email: String) = try {
+        members.value.firstOrNull { it.email == email }!!.name
+    } catch (e: Exception) {
+        throw MemberNotFoundException(email)
+    }
+
     companion object {
         private val TAG = MemberState::class.simpleName
     }

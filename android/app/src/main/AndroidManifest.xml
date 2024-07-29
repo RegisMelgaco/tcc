@@ -34,8 +34,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="plantonista" />
-                <data android:host="regismelgaco.co" />
+                <data android:scheme="https" />
+                <data android:host="www.plataformaplantonista.com" />
                 <data android:pathPattern="/enter_team" />
             </intent-filter>
         </activity>

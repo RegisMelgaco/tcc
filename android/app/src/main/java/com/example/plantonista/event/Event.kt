@@ -10,7 +10,11 @@ typealias AppEvent = Event<AppEventType>
 enum class AppEventType {
     AddMember,
     AddShift,
-    AddAdmin
+    AddAdmin,
+    OpenShiftExchangeRequest,
+    CancelShiftExchangeRequest,
+    AcceptShiftExchangeRequest,
+    ConfirmShiftExchangeRequest,
 }
 
 class UnknownEventTypeException(val type: String): Exception("unknown event with type $type")
@@ -39,6 +43,36 @@ class AppEventFactory: EventFactory<AppEventType> {
                 data.networkName,
                 data.author,
                 data.payload!!["email"] as String,
+                data.createdAt
+            )
+        AppEventType.OpenShiftExchangeRequest.toString() ->
+            OpenShiftExchangeRequestEvent(
+                data.networkName,
+                data.author,
+                (data.payload!!["shiftStart"] as Double).toLong(),
+                data.createdAt
+            )
+        AppEventType.CancelShiftExchangeRequest.toString() ->
+            CancelShiftExchangeRequestEvent(
+                data.networkName,
+                data.author,
+                (data.payload!!["shiftStart"] as Double).toLong(),
+                data.createdAt
+            )
+        AppEventType.AcceptShiftExchangeRequest.toString() ->
+            AcceptShiftExchangeRequestEvent(
+                data.networkName,
+                data.author,
+                data.payload!!["memberEmail"] as String,
+                (data.payload["shiftStart"] as Double).toLong(),
+                data.createdAt
+            )
+        AppEventType.ConfirmShiftExchangeRequest.toString() ->
+            ConfirmShiftExchangeRequestEvent(
+                data.networkName,
+                data.author,
+                data.payload!!["memberEmail"] as String,
+                (data.payload["shiftStart"] as Double).toLong(),
                 data.createdAt
             )
         else ->

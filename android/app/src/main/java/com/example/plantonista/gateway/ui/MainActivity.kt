@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import com.example.plantonista.Configs
 import com.example.plantonista.distevents.Tracker
 import com.example.plantonista.gateway.ui.screen.MemberCreateScreen
+import com.example.plantonista.gateway.ui.screen.NotificationsScreen
 import com.example.plantonista.gateway.ui.screen.ShiftCreateScreen
 import com.example.plantonista.gateway.ui.screen.TeamCodeScreen
 import com.example.plantonista.gateway.ui.screen.TeamCreateScreen
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
         if (intent.data?.path == "/enter_team") {
             Log.d(TAG, intent.data?.queryParameterNames.toString())
             Log.d(TAG, intent.data?.getQueryParameter("name") ?: "nil")
+            Log.d(TAG, intent.data?.getQueryParameter("secret") ?: "nil")
 
             val name = intent.data!!.getQueryParameter("name")!!
             val secret = intent.data!!.getQueryParameter("secret")!!
@@ -90,6 +92,9 @@ class MainActivity : ComponentActivity() {
                         },
                         navigateTeamCode = {
                             navController.navigate(TEAM_CODE_ROUTE)
+                        },
+                        navigateNotifications = {
+                            navController.navigate(NOTIFICATIONS_ROUTE)
                         }
                     )
                 }
@@ -101,6 +106,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(TEAM_CODE_ROUTE) {
                     TeamCodeScreen(back = back)
+                }
+                composable(NOTIFICATIONS_ROUTE) {
+                    NotificationsScreen(back)
                 }
             }
         }
@@ -115,5 +123,6 @@ class MainActivity : ComponentActivity() {
         private const val TEAM_CODE_ROUTE = "team_code"
         private const val SHIFT_CREATE_ROUTE = "shift_create"
         private const val MEMBER_CREATE_ROUTE = "member_create"
+        private const val NOTIFICATIONS_ROUTE = "notifications"
     }
 }
