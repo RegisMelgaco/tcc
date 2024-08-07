@@ -9,7 +9,9 @@ import com.example.plantonista.distevents.sqlite.EventDao
 import com.example.plantonista.distevents.sqlite.NetworkDao
 import com.example.plantonista.distevents.sqlite.NetworkEntity
 import com.example.plantonista.distevents.sqlite.NodeDao
+import com.example.plantonista.distevents.sqlite.getNewEvents
 import com.example.plantonista.distevents.sqlite.toEntity
+import com.example.plantonista.distevents.tcp.EventStreamHead
 import com.example.plantonista.distevents.tcp.SyncEventsRequest
 import com.example.plantonista.distevents.tcp.TCPClient
 import com.example.plantonista.distevents.tcp.TCPServer
@@ -73,17 +75,13 @@ class Tracker(
 
     fun listNetworks() = networkDao.getAll().map { it.toData() }
 
-    suspend fun syncEvents(username: String, delayMS: Long = DEFAULT_DELAY_MS) {
-        while(true) {
-            for (netData in listNetworks()) {
-                val net = getNetwork(netData.name, username)
+    suspend fun syncEvents(username: String) {
+        for (netData in listNetworks()) {
+            val net = getNetwork(netData.name, username)
 
-                net
-                    .getNeighboursAddresses()
-                    .forEach { syncWithIP(netData.name, it) }
-            }
-
-            SystemClock.sleep(delayMS)
+            net
+                .getNeighboursAddresses()
+                .forEach { syncWithIP(netData.name, it) }
         }
     }
 
@@ -94,16 +92,7 @@ class Tracker(
             val ownHeads = eventDao.getEventStreamHead(networkName)
             val request = SyncEventsRequest(networkName, ownHeads.map { it.toRequest() })
             val getLocalEvents =  { syncEventsRequest: SyncEventsRequest ->
-                val resp = mutableListOf<IndexedEventData>()
-                for (head in syncEventsRequest.heads) {
-                    resp.addAll(
-                        eventDao
-                            .getEventsByEventStreamHead(networkName, head.index, head.author)
-                            .map { it.toIndexedData() }
-                    )
-                }
-
-                resp
+                getNewEvents(eventDao, syncEventsRequest)
             }
 
             val newEvents = TCPClient(getLocalEvents).sync(ip, TCPServer.PORT, request)
@@ -118,7 +107,5 @@ class Tracker(
 
     companion object {
         private val TAG = Tracker::class.simpleName
-
-        const val DEFAULT_DELAY_MS = 30_000L
     }
 }

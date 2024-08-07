@@ -129,7 +129,7 @@ func (r *Repository) insert(ctx context.Context, input insertInput) (node, error
 
 	defer stmt.Close()
 
-	row := stmt.QueryRowContext(ctx, input.publicIP, input.email, input.networkID)
+	row := stmt.QueryRowContext(ctx, input.publicIP, time.Now().Unix(), input.email, input.networkID)
 	if err = row.Scan(&stored.id, &stored.updatedAt); err != nil {
 		logger.Error("insert node failed", slog.String("query", insertNode), slog.String("err", err.Error()))
 

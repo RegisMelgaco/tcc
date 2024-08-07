@@ -5,11 +5,11 @@ const (
 		create table if not exists node(
 			node_id integer primary key,
 
-			network_id integet not null,
+			network_id integer not null,
 
 			email text unique not null,
 			public_ip text not null,
-			updated_at datetime not null,
+			updated_at integer not null,
 
 			foreign key(network_id) references network(network_id)
 		);
@@ -55,7 +55,7 @@ const (
 		insert or replace into node
 			(public_ip, updated_at, email, network_id)
 		values
-			(?, datetime(), ?, ?)
+			(?, ?, ?, ?)
 		returning node_id, updated_at;
 	`
 	deleteLocalIPs = `

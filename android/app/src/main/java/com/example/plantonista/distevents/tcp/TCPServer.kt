@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.room.Room
 import com.example.plantonista.distevents.IndexedEventData
 import com.example.plantonista.distevents.sqlite.Database
+import com.example.plantonista.distevents.sqlite.getNewEvents
 import com.example.plantonista.distevents.sqlite.toEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
@@ -67,14 +68,7 @@ class TCPServer : Service() {
                                 ownSyncResponse.map { it.toEntity() }
                             )
 
-                            val peerSyncResponse = mutableListOf<IndexedEventData>()
-                            for(head in peerSyncRequest.heads) {
-                                peerSyncResponse.addAll(
-                                    eventDao.getEventsByEventStreamHead(
-                                        head.networkName, head.index, head.author,
-                                    ).map { it.toIndexedData() }
-                                )
-                            }
+                            val peerSyncResponse = getNewEvents(eventDao, peerSyncRequest)
 
                             output.println(gson.toJson(peerSyncResponse))
                         }

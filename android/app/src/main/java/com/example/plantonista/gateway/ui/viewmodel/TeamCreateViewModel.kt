@@ -8,6 +8,8 @@ import com.example.plantonista.distevents.Tracker
 import com.example.plantonista.event.AddMemberEvent
 import com.example.plantonista.gateway.distevents.GlobalStreamer
 import com.example.plantonista.gateway.preferences.getUsername
+import com.example.plantonista.state.GlobalMemberState
+import com.example.plantonista.state.GlobalShiftState
 import kotlinx.coroutines.runBlocking
 
 class TeamCreateViewModel: ViewModel() {
@@ -18,6 +20,8 @@ class TeamCreateViewModel: ViewModel() {
             val username = getUsername(context)
 
             GlobalStreamer.setup(context, name, username)
+            GlobalMemberState.cleanUp()
+            GlobalShiftState.cleanUp()
             GlobalStreamer.submit(AddMemberEvent(name, username, username, username, System.currentTimeMillis() / 1000))
         }
     }

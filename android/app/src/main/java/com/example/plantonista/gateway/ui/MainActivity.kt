@@ -1,5 +1,6 @@
 package com.example.plantonista.gateway.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -13,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.plantonista.Configs
 import com.example.plantonista.distevents.Tracker
+import com.example.plantonista.distevents.tcp.TCPServer
 import com.example.plantonista.gateway.ui.screen.MemberCreateScreen
 import com.example.plantonista.gateway.ui.screen.NotificationsScreen
 import com.example.plantonista.gateway.ui.screen.ShiftCreateScreen
@@ -42,6 +44,8 @@ class MainActivity : ComponentActivity() {
                 Tracker(applicationContext, Configs.TRACKER_ADDRESS).saveNetwork(name, secret)
             }
         }
+
+        startService(Intent(applicationContext, TCPServer::class.java))
 
         setContent {
             val navController = rememberNavController()

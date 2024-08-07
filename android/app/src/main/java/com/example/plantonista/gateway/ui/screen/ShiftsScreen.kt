@@ -66,7 +66,7 @@ fun ShiftsScreen(
             if (shifts.isEmpty()) {
                 Row(Modifier.fillMaxWidth(), Arrangement.Center) {
                     Text(
-                        text = "Sem times disponíveis",
+                        text = "Sem Plantões Disponíveis",
                         style = MaterialTheme.typography.headlineMedium
                             .merge(TextStyle(fontWeight = FontWeight.Light))
                     )

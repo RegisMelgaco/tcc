@@ -7,7 +7,7 @@ import com.example.plantonista.distevents.IndexedEventData
 import com.example.plantonista.distevents.tcp.EventStreamHead
 import com.google.gson.Gson
 
-@Entity("event", primaryKeys = ["author", "pos"])
+@Entity("event", primaryKeys = ["networkName", "author", "pos"])
 data class EventEntity(
     val author: String,
     val pos: Int,
